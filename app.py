@@ -79,5 +79,5 @@ if prompt := st.chat_input("Ask a question about your documents..."):
                             seen.add(key)
 
         st.session_state.messages.append(
-            {"role": "assistant", "content": result["response"]}
+            {"role": "assistant", "content": result.get("response", "")}
         )

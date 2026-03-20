@@ -1,8 +1,14 @@
 # /home/cydgxbriel/portfolio/docchat/search/hybrid.py
+import re
 import numpy as np
 from rank_bm25 import BM25Okapi
 from langchain_openai import OpenAIEmbeddings
 import faiss
+
+
+def _tokenize(text: str) -> list[str]:
+    """Tokenize text for BM25: lowercase, strip punctuation."""
+    return re.findall(r'\w+', text.lower())
 
 
 class HybridSearch:
@@ -21,7 +27,7 @@ class HybridSearch:
         self._chunks = chunks
         texts = [c["text"] for c in chunks]
 
-        tokenized = [t.lower().split() for t in texts]
+        tokenized = [_tokenize(t) for t in texts]
         self._bm25 = BM25Okapi(tokenized)
 
         vectors = self.embeddings.embed_documents(texts)
@@ -48,7 +54,7 @@ class HybridSearch:
             if idx >= 0
         }
 
-        bm25_scores = self._bm25.get_scores(query_text.lower().split())
+        bm25_scores = self._bm25.get_scores(_tokenize(query_text))
         max_bm25 = max(bm25_scores) if max(bm25_scores) > 0 else 1.0
         bm25_norm = bm25_scores / max_bm25
 
